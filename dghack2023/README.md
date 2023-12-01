@@ -10,6 +10,7 @@ Bravo à tous les participants et un grand Merci aux organisteurs et aux builder
 
 - [JarJarBank](./JarJarBank/README.md) - Web - 300 pts
 - [InfiniteMoneyGlitch](./InfiniteMoneyGlitch/README.md) - Dev - 200 pts
+- [AMazeIn](./AMazeIn/README.md) - Stéganographie - 50 pts
 
 ## Les épreuves
 
