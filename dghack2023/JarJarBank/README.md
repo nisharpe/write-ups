@@ -176,7 +176,7 @@ En faisant un tour sur les autres fichiers on apprend que plusieurs API REST son
 
 et qu'un service SOAP est aussi accessible sur le endpoint `/service/` avec un payload `transactionRequest`.
 
-En lisant le code du controller de l'API `/flag/`, on comprend que cet ici qu'on va pouvoir récupérer le premier flag à travers un appel GET sur `/api/v1/flag/getFirstFlag`` mais qu'il faut être authentifié.
+En lisant le code du controller de l'API `/flag/`, on comprend que cet ici qu'on va pouvoir récupérer le premier flag à travers un appel GET sur `/api/v1/flag/getFirstFlag` mais qu'il faut être authentifié.
 
 ```java
 @RestController
@@ -309,7 +309,7 @@ Il faut comprendre ici que dès qu'un appel est réalisé, celui-ci va traverser
 - Le jwtAuthFilter(), qui permet d'authentifer un utilisateur si l'appelant à utiliser un header "Authorization" avec un "Bearer" token.
 - Le maintenanceFilter() qui permet de filtrer les appels qui ne commencent pas par `/api/`, `/service/`, `/resources/` et `/maintenance/` pour redirger vers `/maintenance/`.
 
-Puis, l'appel est envoyé dans le reste de la chain-ci dessus. On voit qu'il estp ossible d'appeler ces APIs sans être authentifié :
+Puis, l'appel est envoyé dans le reste de la chain-ci dessus. On voit qu'il est possible d'appeler ces APIs sans être authentifié :
 
 ```java
         .authenticationEntryPoint(this.authenticationEntryPoint).and()).authorizeHttpRequests()
@@ -509,7 +509,7 @@ Pour interroger le service, il faut communiquer en SOAP et avoir la bonne envelo
 </xs:schema>
 ```
 
-Voici, l'enveloppe reconstituée avec un premier payload ("1") que j'enregistre dans un fichier `request.xml` part :
+Voici, l'enveloppe reconstituée avec un premier payload ("1") que j'enregistre dans un fichier `request.xml` :
 
 ```xml
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
@@ -625,7 +625,7 @@ curl -v https://jarjarbank.chall.malicecyber.com/api/v1/flag/getFirstFlag -H "Au
 
 **Second Step : Récupération du Flag 2**
 
-L'étape numéro 2 m'a demandé beaucoup de patience. Je me suis orientée vers le leurre de la SQLi, je pensais qu'il fallait réaliser une élévation de privilèges en leakant l'email/password du support ou de l'admin mais je faisais fausse route.
+L'étape numéro 2 m'a demandé beaucoup de patience. Je me suis orienté vers le leurre de la SQLi, je pensais qu'il fallait réaliser une élévation de privilèges en leakant l'email/password du support ou de l'admin mais je faisais fausse route.
 
 En parcourant les différentes classes du projet Java, je me suis déjà aperçu de plusieurs choses que j'ai omis de préciser plus tôt.
 Le projet utilise plusieurs libs, dont deux qui ne sont pas officielles :
@@ -730,7 +730,9 @@ public class TransactionAPI {
 }
 ```
 
-Tout d'abord, elle doit être préfixée par une version: `$1$, $2$ ou $LEGACY$``, puis une chaîne encodée en base64 `Pattern.compile("\\$(?:\\d|LEGACY)\\$((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+]{4})$)");`. Elle est ensuite envoyée dans la fonction statique `TransactionImporter.importTransaction(data, getTransactionConfig(version))`. Le deuxième paramètre étant un "CryptoConfigurator" généré à partir d'un key store (contenu dans la lib) protégé par un password (ouf en clair ici) : "DGH@CK2023!". Passons à la suite.
+Tout d'abord, elle doit être préfixée par une version: `$1$, $2$ ou $LEGACY$`, puis une chaîne encodée en base64 `Pattern.compile("\\$(?:\\d|LEGACY)\\$((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+]{4})$)");`. 
+
+Elle est ensuite envoyée dans la fonction statique `TransactionImporter.importTransaction(data, getTransactionConfig(version))`. Le deuxième paramètre étant un "CryptoConfigurator" généré à partir d'un key store (contenu dans la lib) protégé par un password (ouf en clair ici) : "DGH@CK2023!". Passons à la suite.
 
 ```java
 public class TransactionImporter {
@@ -794,6 +796,7 @@ public class TransactionEncryptorHelper {
 
 La fonction decrypt permet le déchiffrement de la chaîne encodée en base64 en fonction de l'algorithme (version: `$1$,$2$,$LEGACY$`) utilisée.
 La fonction verify permet de vérifier que la transaction envoyée en paramètre est valide et signée.
+
 MAIIIIS : `SignedObject signedTransaction = (SignedObject)in.readObject();`, la donnée transaction envoyée par l'appelant est deserialisée !!!
 STOP, on s'arrête là et on fait une pause, remontons le temps.
 
@@ -967,9 +970,7 @@ public class CommonsCollections2 implements ObjectPayload<Queue<Object>> {
 ```
 
 
-    Note:
-
-    Je me suis beaucoup concentré sur la CommonCollections7 dans un premier temps car elle me semblait bien adapté, mais j'ai lâché l'affaire en voyant des "null" arriver dans les logs. 
+    Note: Je me suis beaucoup concentré sur la CommonCollections7 dans un premier temps car elle me semblait bien adapté, mais j'ai lâché l'affaire en voyant des "null" arriver dans les logs. 
     J'ai découvert plus tard (post flag après discussion avec un autre participant) que même si celle-ci provoquait des null à cause de l'objet transient, la RCE fonctionnait. 
     Comme un idiot, je vérifiai pas que la RCE avait bien trigger...
 

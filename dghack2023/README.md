@@ -9,6 +9,7 @@ J'ai apprécié une nouveauté cette année: les challenges multi-flags, qui per
 Bravo à tous les participants et un grand Merci aux organisteurs et aux builders pour ces challenges de qualité et réaliste.
 
 - [JarJarBank](./JarJarBank/README.md) - Web - 300 pts
+- [InfiniteMoneyGlitch](./InfiniteMoneyGlitch/README.md) - Dev - 200 pts
 
 ## Les épreuves
 
